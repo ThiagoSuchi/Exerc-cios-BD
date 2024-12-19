@@ -62,7 +62,37 @@ call cadastrarAutor(28374996, 'Ludwig Von Mises', 'Austríaco');
 select*from autores;
 
 -- Exercício 08 FUNCTIONS - Crie uma função para calcular o desconto de um livro dado um percentual.
+DELIMITER $$
+create function descontoLivro (preco decimal(10,2), desconto int)
+returns decimal(10,2)
+deterministic
+begin
+	set preco = preco - (preco * desconto / 100);
+    return preco;
+end $$
+DELIMITER ;
+
+select l.titulo as 'Livro', l.preco as 'Valor sem desconto', 
+descontoLivro(l.preco, 10) as 'Valor do livro com 10% de desconto'
+from livros l;
+
 -- Exercício 09 VIEWS - Crie uma view para listar os livros com seus respectivos autores e editoras.
--- Exercício 10 TRANSAÇÕES - Exemplo de transação para cadastrar um livro e associar um autor.
+create view lista_Autores_Livros_Editoras as
+select a.nome, l.titulo, e.nome_editora
+from livros_autores la
+inner join livros l on la.numero_livro = l.numero
+inner join autores a on la.codigo_autor = a.codigo
+inner join editoras e on l.codigo_editora = e.codigo_editora;
+
+select * from lista_Autores_Livros_Editoras;
+
+-- Exercício 10 TRANSAÇÕES - Exemplo de transação para cadastrar um livro e associar um autor.]
+start transaction;
+	insert into livros(numero, titulo, genero, edicao, ano_publicacao, CPF_funcionario, codigo_editora, CPF_usuarioRetirar, CPF_usuarioReservar, preco)
+    values (44328819, 'As seis liçoes de Mises', 'Ensiao econômico', 6, 2010-10-21, 05280334302, 7732718, 84378445432, 84374399239, 80.90);
+    
+commit;
+select*from livros_autores;
+
 -- Exercício 11 DCL (GRANT e REVOKE) - Conceda permissão de SELECT na tabela livros para o usuário usuario_teste.
 -- Exercício 12 DCL (GRANT e REVOKE) - Revogue a permissão de SELECT na tabela livros do usuário usuario_teste
