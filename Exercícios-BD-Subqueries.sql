@@ -63,11 +63,38 @@ where l.preco between (select min(preco) from livros)
 				   and (select max(preco) from livros);
 
 -- Exercício 08 - Encontre os nomes das editoras que publicaram livros de pelo menos três autores diferentes.
-
+select e.nome_editora
+from editoras e
+where e.codigo_editora in (
+					select l.codigo_editora
+					from livros_autores la
+					inner join livros l on l.numero = la.numero_livro
+					group by l.codigo_editora
+					having count(distinct codigo_autor) >= 3
+                    );
+                        
 
 -- Exercício 09 - Liste os títulos dos livros que não possuem autores associados.
--- Exercício 10 - Liste o nome dos autores que escreveram livros com preço superior à média de preços dos livros publicados pela 'Editora Summer'.
+select l.titulo
+from livros l
+where l.numero not in (
+				select la.numero_livro
+                from livros_autores la
+                );
+                   
 
+-- Exercício 10 - Liste o nome dos autores que escreveram livros com preço superior à média de preços dos livros publicados pela 'Saraiva'.
+select a.nome
+from autores a
+where a.codigo in (
+			select la.codigo_autor
+            from livros_autores la
+            inner join livros l on l.numero = la.numero_livro
+            where l.preco > (select avg(l.preco)
+							 from livros l
+                             inner join editoras e on e.codigo_editora = l.codigo_editora
+                             where e.nome_editora = 'Pontes')
+			);
 select*from editoras;
 select*from autores;
 select*from livros;
